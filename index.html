@@ -457,6 +457,71 @@
         .export-section h3 {
             margin-bottom: 16px;
         }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .profile-item {
+            padding: 12px;
+            background: var(--color-bg);
+            border-radius: 8px;
+            border-left: 3px solid var(--color-primary);
+        }
+
+        .profile-item strong {
+            display: block;
+            color: var(--color-text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .profile-item span {
+            color: var(--color-text);
+            font-size: 1rem;
+        }
+
+        .profile-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .profile-list-item {
+            padding: 16px;
+            background: var(--color-bg);
+            border-radius: 8px;
+            border-left: 3px solid var(--color-success);
+        }
+
+        .profile-list-item h4 {
+            color: var(--color-text);
+            margin-bottom: 4px;
+            font-size: 1.1rem;
+        }
+
+        .profile-list-item p {
+            color: var(--color-text-secondary);
+            font-size: 0.9rem;
+            margin: 2px 0;
+        }
+
+        .profile-section {
+            margin-bottom: 24px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
     </style>
 </head>
 <body>
@@ -470,6 +535,7 @@
             <button class="tab-btn active" onclick="switchTab('basic')">📄 Basic Analysis</button>
             <button class="tab-btn" onclick="switchTab('matcher')">🎯 Job Matcher</button>
             <button class="tab-btn" onclick="switchTab('industry')">🏢 Industry Optimizer</button>
+            <button class="tab-btn" onclick="switchTab('profile')">👤 User Profile</button>
         </div>
 
         <!-- Basic Analysis Tab -->
@@ -477,6 +543,16 @@
             <div class="main-content">
                 <div class="card">
                     <h2><span class="icon">📝</span> Your Resume</h2>
+                    
+                    <div class="upload-section" style="margin-bottom: 16px; padding: 20px; border: 2px dashed var(--color-border); border-radius: 8px; text-align: center; background: var(--color-bg);">
+                        <p style="margin-bottom: 12px; color: var(--color-text-secondary);"><strong>📄 Upload PDF, Image, or Document</strong></p>
+                        <input type="file" id="fileUpload" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display: none;" onchange="handleFileUpload(event)">
+                        <button class="btn" onclick="document.getElementById('fileUpload').click()">📁 Choose File</button>
+                        <p style="margin-top: 8px; font-size: 0.85rem; color: var(--color-text-secondary);">Supports: PDF, JPG, PNG, DOC, DOCX</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 12px 0; color: var(--color-text-secondary); font-weight: 600;">OR</div>
+                    
                     <textarea id="resumeText" placeholder="Paste your resume text here..."></textarea>
                     <div class="btn-group">
                         <button class="btn" onclick="analyzeResume()">🔍 Analyze Resume</button>
@@ -574,6 +650,67 @@
                 </div>
 
                 <div class="analysis-section" id="matchAnalysis"></div>
+            </div>
+        </div>
+
+        <!-- User Profile Tab -->
+        <div id="profile" class="tab-content">
+            <div class="card" style="max-width: 800px; margin: 0 auto;">
+                <h2><span class="icon">👤</span> Extracted User Profile</h2>
+                
+                <div id="profileData" style="display: none;">
+                    <div class="profile-section">
+                        <h3 style="color: var(--color-primary); margin: 20px 0 12px 0; font-size: 1.2rem;">📋 Personal Information</h3>
+                        <div class="profile-grid">
+                            <div class="profile-item">
+                                <strong>Full Name:</strong>
+                                <span id="profileName">--</span>
+                            </div>
+                            <div class="profile-item">
+                                <strong>Email:</strong>
+                                <span id="profileEmail">--</span>
+                            </div>
+                            <div class="profile-item">
+                                <strong>Phone:</strong>
+                                <span id="profilePhone">--</span>
+                            </div>
+                            <div class="profile-item">
+                                <strong>Location:</strong>
+                                <span id="profileLocation">--</span>
+                            </div>
+                            <div class="profile-item">
+                                <strong>LinkedIn:</strong>
+                                <span id="profileLinkedIn">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3 style="color: var(--color-primary); margin: 20px 0 12px 0; font-size: 1.2rem;">🎓 Education</h3>
+                        <div id="profileEducation" class="profile-list"></div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3 style="color: var(--color-primary); margin: 20px 0 12px 0; font-size: 1.2rem;">💼 Work Experience</h3>
+                        <div id="profileExperience" class="profile-list"></div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3 style="color: var(--color-primary); margin: 20px 0 12px 0; font-size: 1.2rem;">🛠️ Skills</h3>
+                        <div id="profileSkills" class="keywords"></div>
+                    </div>
+
+                    <div class="btn-group" style="margin-top: 24px;">
+                        <button class="btn" onclick="exportProfileJSON()">📥 Download Profile (JSON)</button>
+                        <button class="btn btn-secondary" onclick="exportProfileText()">📄 Download Profile (Text)</button>
+                    </div>
+                </div>
+
+                <div id="profileEmpty" style="text-align: center; padding: 40px; color: var(--color-text-secondary);">
+                    <p style="font-size: 3rem; margin-bottom: 16px;">👤</p>
+                    <h3 style="margin-bottom: 8px;">No Profile Data Yet</h3>
+                    <p>Upload or analyze a resume in the Basic Analysis tab to extract user profile information.</p>
+                </div>
             </div>
         </div>
 
@@ -675,6 +812,13 @@
         const requiredSections = ['experience', 'education', 'skills', 'contact', 'summary', 'work', 'projects'];
 
         let currentAnalysis = null;
+        let extractedProfile = null;
+
+        // PDF.js CDN
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        if (pdfjsLib) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
 
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(tab => {
@@ -749,17 +893,324 @@ Methodologies: Agile, Scrum, CI/CD, Test-Driven Development`;
             document.getElementById('keywordsSection').innerHTML = '';
         }
 
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const loadingMsg = document.createElement('div');
+            loadingMsg.style.cssText = 'text-align: center; padding: 20px; color: var(--color-primary); font-weight: 600;';
+            loadingMsg.innerHTML = '<div class="loading-spinner"></div> Processing file...';
+            
+            const uploadSection = document.querySelector('.upload-section');
+            uploadSection.appendChild(loadingMsg);
+
+            try {
+                let text = '';
+                
+                if (file.type === 'application/pdf') {
+                    text = await extractTextFromPDF(file);
+                } else if (file.type.startsWith('image/')) {
+                    text = await extractTextFromImage(file);
+                } else {
+                    text = await extractTextFromDoc(file);
+                }
+
+                document.getElementById('resumeText').value = text;
+                document.getElementById('resumeTextMatcher').value = text;
+                document.getElementById('resumeTextIndustry').value = text;
+                
+                loadingMsg.remove();
+                alert('✅ File processed successfully! Text has been extracted.');
+                
+                // Auto-analyze after upload
+                analyzeResume();
+            } catch (error) {
+                loadingMsg.remove();
+                alert('❌ Error processing file: ' + error.message);
+                console.error('File processing error:', error);
+            }
+        }
+
+        async function extractTextFromPDF(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async function() {
+                    try {
+                        const typedArray = new Uint8Array(this.result);
+                        const pdf = await pdfjsLib.getDocument(typedArray).promise;
+                        let fullText = '';
+                        
+                        for (let i = 1; i <= pdf.numPages; i++) {
+                            const page = await pdf.getPage(i);
+                            const textContent = await page.getTextContent();
+                            const pageText = textContent.items.map(item => item.str).join(' ');
+                            fullText += pageText + '\n';
+                        }
+                        
+                        resolve(fullText);
+                    } catch (error) {
+                        reject(new Error('Failed to parse PDF: ' + error.message));
+                    }
+                };
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        async function extractTextFromImage(file) {
+            // For images, we'll use a simple approach - in production, you'd use Tesseract.js
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function() {
+                    // Simulate OCR - in production, integrate Tesseract.js
+                    alert('📸 Image uploaded! For best results with images containing text, please:\n\n1. Use high-quality, clear images\n2. Ensure good lighting and contrast\n\nNote: Full OCR support coming soon. For now, please type or paste the text from your resume.');
+                    resolve('');
+                };
+                reader.onerror = () => reject(new Error('Failed to read image'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function extractTextFromDoc(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function() {
+                    // Basic text extraction from .doc/.docx
+                    // In production, you'd use mammoth.js or similar
+                    alert('📄 Document uploaded! For .doc/.docx files:\n\nPlease copy the text from your document and paste it into the text area.\n\nFull document parsing support coming soon!');
+                    resolve('');
+                };
+                reader.onerror = () => reject(new Error('Failed to read document'));
+                reader.readAsText(file);
+            });
+        }
+
         function analyzeResume() {
             const resumeText = document.getElementById('resumeText').value;
             
             if (!resumeText.trim()) {
-                alert('Please paste your resume text first!');
+                alert('Please paste your resume text or upload a file first!');
                 return;
             }
 
             const analysis = performAnalysis(resumeText);
             currentAnalysis = analysis;
             displayResults(analysis);
+            
+            // Extract and display user profile
+            extractUserProfile(resumeText);
+        }
+
+        function extractUserProfile(text) {
+            const profile = {
+                name: extractName(text),
+                email: extractEmail(text),
+                phone: extractPhone(text),
+                location: extractLocation(text),
+                linkedin: extractLinkedIn(text),
+                education: extractEducation(text),
+                experience: extractExperience(text),
+                skills: extractSkills(text)
+            };
+            
+            extractedProfile = profile;
+            displayProfile(profile);
+        }
+
+        function extractName(text) {
+            const lines = text.split('\n');
+            // First non-empty line is usually the name
+            for (let line of lines) {
+                const trimmed = line.trim();
+                if (trimmed && trimmed.length < 50 && /^[A-Z][a-zA-Z\s\.]+$/.test(trimmed)) {
+                    return trimmed;
+                }
+            }
+            return 'Not found';
+        }
+
+        function extractEmail(text) {
+            const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+            const match = text.match(emailRegex);
+            return match ? match[0] : 'Not found';
+        }
+
+        function extractPhone(text) {
+            const phoneRegex = /\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/;
+            const match = text.match(phoneRegex);
+            return match ? match[0] : 'Not found';
+        }
+
+        function extractLocation(text) {
+            const locationRegex = /([A-Z][a-zA-Z\s]+,\s*[A-Z]{2})|([A-Z][a-zA-Z\s]+,\s*[A-Z][a-zA-Z\s]+)/;
+            const match = text.match(locationRegex);
+            return match ? match[0] : 'Not found';
+        }
+
+        function extractLinkedIn(text) {
+            const linkedInRegex = /linkedin\.com\/in\/[\w-]+/;
+            const match = text.match(linkedInRegex);
+            return match ? match[0] : 'Not found';
+        }
+
+        function extractEducation(text) {
+            const education = [];
+            const degreeKeywords = ['Bachelor', 'Master', 'PhD', 'Associate', 'Diploma', 'Certificate', 'B.S.', 'M.S.', 'B.A.', 'M.A.'];
+            const lines = text.split('\n');
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                for (let keyword of degreeKeywords) {
+                    if (line.includes(keyword)) {
+                        const edu = {
+                            degree: line.trim(),
+                            institution: lines[i + 1] ? lines[i + 1].trim() : '',
+                            year: extractYear(line + (lines[i + 1] || ''))
+                        };
+                        education.push(edu);
+                        break;
+                    }
+                }
+            }
+            
+            return education.length > 0 ? education : [{ degree: 'Education section not clearly identified', institution: '', year: '' }];
+        }
+
+        function extractExperience(text) {
+            const experience = [];
+            const lines = text.split('\n');
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                // Look for job titles (lines with |, dates, or following experience/work sections)
+                if (line.includes('|') && extractYear(line)) {
+                    const parts = line.split('|');
+                    experience.push({
+                        title: parts[0] ? parts[0].trim() : 'Position',
+                        company: parts[1] ? parts[1].trim() : 'Company',
+                        period: parts[2] ? parts[2].trim() : extractYear(line)
+                    });
+                }
+            }
+            
+            return experience.length > 0 ? experience : [{ title: 'Experience section not clearly identified', company: '', period: '' }];
+        }
+
+        function extractSkills(text) {
+            const allSkills = new Set();
+            Object.values(industryKeywords).forEach(industry => {
+                industry.skills.forEach(skill => {
+                    if (text.toLowerCase().includes(skill.toLowerCase())) {
+                        allSkills.add(skill);
+                    }
+                });
+            });
+            return Array.from(allSkills);
+        }
+
+        function extractYear(text) {
+            const yearRegex = /\b(19|20)\d{2}\b/;
+            const match = text.match(yearRegex);
+            return match ? match[0] : '';
+        }
+
+        function displayProfile(profile) {
+            document.getElementById('profileData').style.display = 'block';
+            document.getElementById('profileEmpty').style.display = 'none';
+            
+            document.getElementById('profileName').textContent = profile.name;
+            document.getElementById('profileEmail').textContent = profile.email;
+            document.getElementById('profilePhone').textContent = profile.phone;
+            document.getElementById('profileLocation').textContent = profile.location;
+            document.getElementById('profileLinkedIn').textContent = profile.linkedin;
+            
+            // Education
+            const eduDiv = document.getElementById('profileEducation');
+            eduDiv.innerHTML = '';
+            profile.education.forEach(edu => {
+                eduDiv.innerHTML += `
+                    <div class="profile-list-item">
+                        <h4>${edu.degree}</h4>
+                        <p>${edu.institution}</p>
+                        <p style="color: var(--color-primary);">${edu.year}</p>
+                    </div>
+                `;
+            });
+            
+            // Experience
+            const expDiv = document.getElementById('profileExperience');
+            expDiv.innerHTML = '';
+            profile.experience.forEach(exp => {
+                expDiv.innerHTML += `
+                    <div class="profile-list-item">
+                        <h4>${exp.title}</h4>
+                        <p>${exp.company}</p>
+                        <p style="color: var(--color-primary);">${exp.period}</p>
+                    </div>
+                `;
+            });
+            
+            // Skills
+            const skillsDiv = document.getElementById('profileSkills');
+            skillsDiv.innerHTML = '';
+            profile.skills.forEach(skill => {
+                skillsDiv.innerHTML += `<span class="keyword-tag">${skill}</span>`;
+            });
+            
+            if (profile.skills.length === 0) {
+                skillsDiv.innerHTML = '<p style="color: var(--color-text-secondary);">No recognizable skills found in standard database.</p>';
+            }
+        }
+
+        function exportProfileJSON() {
+            if (!extractedProfile) {
+                alert('Please analyze a resume first!');
+                return;
+            }
+            
+            const dataStr = JSON.stringify(extractedProfile, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'user-profile.json';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function exportProfileText() {
+            if (!extractedProfile) {
+                alert('Please analyze a resume first!');
+                return;
+            }
+            
+            let text = `USER PROFILE\n${'='.repeat(50)}\n\n`;
+            text += `Name: ${extractedProfile.name}\n`;
+            text += `Email: ${extractedProfile.email}\n`;
+            text += `Phone: ${extractedProfile.phone}\n`;
+            text += `Location: ${extractedProfile.location}\n`;
+            text += `LinkedIn: ${extractedProfile.linkedin}\n\n`;
+            
+            text += `EDUCATION\n${'-'.repeat(50)}\n`;
+            extractedProfile.education.forEach(edu => {
+                text += `${edu.degree}\n${edu.institution}\n${edu.year}\n\n`;
+            });
+            
+            text += `WORK EXPERIENCE\n${'-'.repeat(50)}\n`;
+            extractedProfile.experience.forEach(exp => {
+                text += `${exp.title}\n${exp.company}\n${exp.period}\n\n`;
+            });
+            
+            text += `SKILLS\n${'-'.repeat(50)}\n`;
+            text += extractedProfile.skills.join(', ');
+            
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'user-profile.txt';
+            a.click();
+            window.URL.revokeObjectURL(url);
         }
 
         function performAnalysis(text) {
@@ -1118,6 +1569,9 @@ Methodologies: Agile, Scrum, CI/CD, Test-Driven Development`;
             window.URL.revokeObjectURL(url);
         }
     </script>
+    
+    <!-- PDF.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </body>
 </html>
 
