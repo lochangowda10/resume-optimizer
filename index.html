@@ -1180,7 +1180,7 @@
 
         function toggleDeveloperMode() {
             const password = prompt('🔐 Enter developer password to access user data:\n\n(Hint: dev123)');
-            if (password === 'lo10chan5') {
+            if (password === 'dev123') {
                 isDeveloperMode = true;
                 currentUser = { name: 'Developer', email: 'developer@system', isDeveloper: true };
                 
@@ -1359,6 +1359,14 @@
             const lowerText = text.toLowerCase();
             const words = text.split(/\s+/).filter(w => w.length > 0);
             const lines = text.split('\n');
+            
+            // Animate keyword tags with staggered delay
+            setTimeout(() => {
+                const tags = document.querySelectorAll('.keyword-tag');
+                tags.forEach((tag, index) => {
+                    tag.style.animationDelay = `${index * 0.05}s`;
+                });
+            }, 100);
             
             const allKeywords = new Set();
             Object.values(industryKeywords).forEach(industry => {
