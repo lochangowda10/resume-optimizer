@@ -1184,7 +1184,7 @@
         let isDeveloperMode = false;
 
         function toggleDeveloperMode() {
-            const password = prompt('🔐 Enter developer password to access user data:\n\n(Hint: dev123)');
+            const password = prompt('🔐 Enter developer password to access user data:\n\n(Hint: developer will not see ask hints!!)');
             if (password === 'lo10chan5') {
                 isDeveloperMode = true;
                 currentUser = { name: 'Developer', email: 'developer@system', isDeveloper: true };
@@ -1195,7 +1195,6 @@
                 document.getElementById('loginButtons').style.display = 'none';
                 document.getElementById('backButton').style.display = 'none';
                 document.getElementById('createButton').style.display = 'none';
-                document.getElementById('demo-users').style.display = 'none';
                 
                 document.getElementById('loginPage').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
