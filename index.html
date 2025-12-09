@@ -27,10 +27,31 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #667eea 100%);
             min-height: 100vh;
             padding: 20px;
             color: var(--color-text);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        * {
+            position: relative;
+            z-index: 1;
         }
 
         .login-container {
@@ -630,22 +651,6 @@
         <button class="btn btn-primary" id="createButton" style="width: 100%; margin-bottom: 16px; display: none;" onclick="createAccount()">✅ Create Account</button>
 
         <button class="btn btn-secondary" style="width: 100%; margin-bottom: 16px;" onclick="toggleDeveloperMode()">👨‍💻 Developer Access</button>
-
-        <div class="demo-users" id="demo-users">
-            <h3>📋 Demo Users (Click to auto-fill):</h3>
-            <div class="demo-user" onclick="fillDemoUser('user1@email.com', 'pass123')">
-                <strong>User 1</strong>
-                <span>user1@email.com / pass123</span>
-            </div>
-            <div class="demo-user" onclick="fillDemoUser('user2@email.com', 'pass456')">
-                <strong>User 2</strong>
-                <span>user2@email.com / pass456</span>
-            </div>
-            <div class="demo-user" onclick="fillDemoUser('admin@email.com', 'admin123')">
-                <strong>Admin</strong>
-                <span>admin@email.com / admin123</span>
-            </div>
-        </div>
     </div>
 
     <!-- Main App -->
