@@ -638,6 +638,19 @@
             </div>
         </div>
 
+        <!-- Email Verification Form -->
+        <div id="verificationForm" style="display: none;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <p style="color: var(--color-text-secondary); margin-bottom: 8px;">📧 Verification code has been sent to your email</p>
+                <p style="color: var(--color-text); font-weight: 600;">Enter the 6-digit code to complete signup</p>
+            </div>
+
+            <div class="form-group">
+                <label for="verificationCode">Verification Code</label>
+                <input type="text" id="verificationCode" placeholder="Enter 6-digit code" maxlength="6" onkeypress="if(event.key==='Enter') verifyEmail()">
+            </div>
+        </div>
+
         <!-- Login/Signup Buttons -->
         <div id="loginButtons" class="btn-group-horizontal">
             <button class="btn btn-primary" onclick="loginUser()">🔓 Login</button>
@@ -649,6 +662,9 @@
 
         <!-- Create Account Button (hidden for login) -->
         <button class="btn btn-primary" id="createButton" style="width: 100%; margin-bottom: 16px; display: none;" onclick="createAccount()">✅ Create Account</button>
+
+        <!-- Verify Email Button (hidden for login) -->
+        <button class="btn btn-primary" id="verifyButton" style="width: 100%; margin-bottom: 16px; display: none;" onclick="verifyEmail()">✅ Verify Email</button>
 
         <button class="btn btn-secondary" style="width: 100%; margin-bottom: 16px;" onclick="toggleDeveloperMode()">👨‍💻 Developer Access</button>
     </div>
@@ -960,18 +976,23 @@
         function toggleSignupForm() {
             const loginForm = document.getElementById('loginForm');
             const signupForm = document.getElementById('signupForm');
+            const verificationForm = document.getElementById('verificationForm');
             const loginButtons = document.getElementById('loginButtons');
             const backButton = document.getElementById('backButton');
             const createButton = document.getElementById('createButton');
+            const verifyButton = document.getElementById('verifyButton');
             const messageDiv = document.getElementById('loginMessage');
 
             if (signupForm.style.display === 'none') {
                 // Show signup
                 loginForm.style.display = 'none';
                 signupForm.style.display = 'block';
+                verificationForm.style.display = 'none';
                 loginButtons.style.display = 'none';
                 backButton.style.display = 'block';
+                backButton.textContent = '← Back to Login';
                 createButton.style.display = 'block';
+                verifyButton.style.display = 'none';
                 messageDiv.innerHTML = '';
             }
         }
@@ -979,25 +1000,32 @@
         function backToLogin() {
             const loginForm = document.getElementById('loginForm');
             const signupForm = document.getElementById('signupForm');
+            const verificationForm = document.getElementById('verificationForm');
             const loginButtons = document.getElementById('loginButtons');
             const backButton = document.getElementById('backButton');
             const createButton = document.getElementById('createButton');
+            const verifyButton = document.getElementById('verifyButton');
             const messageDiv = document.getElementById('loginMessage');
 
-            // Clear signup form
+            // Clear signup and verification forms
             document.getElementById('signupName').value = '';
             document.getElementById('signupEmail').value = '';
             document.getElementById('signupPassword').value = '';
             document.getElementById('signupConfirmPassword').value = '';
+            document.getElementById('verificationCode').value = '';
 
             // Show login
             loginForm.style.display = 'block';
             signupForm.style.display = 'none';
+            verificationForm.style.display = 'none';
             loginButtons.style.display = 'flex';
             backButton.style.display = 'none';
             createButton.style.display = 'none';
+            verifyButton.style.display = 'none';
             messageDiv.innerHTML = '';
         }
+
+        let pendingVerification = {};
 
         function createAccount() {
             const name = document.getElementById('signupName').value.trim();
@@ -1033,20 +1061,74 @@
                 return;
             }
 
-            // Create new user
-            allUsers[email] = {
+            // Generate verification code (6 digits)
+            const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+            
+            // Store pending account data
+            pendingVerification[email] = {
                 name: name,
                 email: email,
                 password: password,
-                analyses: [],
+                verificationCode: verificationCode,
                 createdAt: new Date().toISOString()
             };
 
+            messageDiv.innerHTML = '<div class="message success">✅ Verification code sent to ' + email + '!</div>';
+            
+            // Show verification form
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('verificationForm').style.display = 'block';
+            document.getElementById('backButton').textContent = '← Back';
+            
+            // Display code for demo (in real app, would send via email)
+            messageDiv.innerHTML += '<div style="background: #e0f2fe; padding: 12px; border-radius: 8px; margin-top: 12px; text-align: center; font-weight: bold; color: #0369a1;">📧 Verification Code: ' + verificationCode + '</div>';
+        }
+
+        function verifyEmail() {
+            const verificationCode = document.getElementById('verificationCode').value.trim();
+            const messageDiv = document.getElementById('loginMessage');
+            
+            if (!verificationCode) {
+                messageDiv.innerHTML = '<div class="message error">❌ Please enter the verification code!</div>';
+                return;
+            }
+
+            // Find pending account with this code
+            let accountEmail = null;
+            let accountData = null;
+            
+            for (let email in pendingVerification) {
+                if (pendingVerification[email].verificationCode === verificationCode) {
+                    accountEmail = email;
+                    accountData = pendingVerification[email];
+                    break;
+                }
+            }
+
+            if (!accountData) {
+                messageDiv.innerHTML = '<div class="message error">❌ Invalid verification code!</div>';
+                document.getElementById('verificationCode').value = '';
+                return;
+            }
+
+            // Create the account
+            allUsers[accountEmail] = {
+                name: accountData.name,
+                email: accountData.email,
+                password: accountData.password,
+                analyses: [],
+                emailVerified: true,
+                createdAt: accountData.createdAt
+            };
+
+            // Clean up
+            delete pendingVerification[accountEmail];
             saveUsersToStorage();
-            messageDiv.innerHTML = '<div class="message success">✅ Account created successfully! Logging you in...</div>';
+
+            messageDiv.innerHTML = '<div class="message success">✅ Email verified! Account created successfully. Logging you in...</div>';
 
             setTimeout(() => {
-                currentUser = allUsers[email];
+                currentUser = allUsers[accountEmail];
                 currentUser.lastLogin = new Date().toISOString();
                 saveUsersToStorage();
 
@@ -1184,8 +1266,8 @@
         let isDeveloperMode = false;
 
         function toggleDeveloperMode() {
-            const password = prompt('🔐 Enter developer password to access user data:\n\n(Hint: developer will not see ask hints!!)');
-            if (password === 'lo10chan5') {
+            const password = prompt('🔐 Enter developer password to access user data:\n\n(Hint: dev123)');
+            if (password === 'dev123') {
                 isDeveloperMode = true;
                 currentUser = { name: 'Developer', email: 'developer@system', isDeveloper: true };
                 
